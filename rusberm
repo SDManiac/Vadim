@@ -1,0 +1,298 @@
+import requests
+from lxml import html
+import matplotlib.pyplot as plt
+import numpy as np
+
+l=[]
+data = []
+
+def parser():
+    page = requests.get("https://github.com/infoculture/opencustoms/blob/master/data/countries/bermudi.csv")
+    tree = html.fromstring(page.content)
+    xp1 = tree.xpath("//tr[@class='js-file-line']")
+    for x in xp1:
+        global l
+        for text in x[1:]:
+            l.append(text.text)
+    global data
+    while l != []:
+        data.append([])
+        for i in range(10):
+            data[-1].append(l.pop(0))
+
+
+def dating():                                                # Функция формирующая массив данных в словаре по годам
+    parser()
+    data.pop(0)                                              # Удаление первой строки, за ненадобностью
+
+    for i in data:
+        if i[0] == 'ИМ':                                     # Разделение импорта и экпорта
+
+            if datImNETTO.setdefault(i[1], 0.0) == 0.0:      # Заполнение словаря НЕТТО импорта
+                pass
+            datImNETTO[i[1]] += float(i[6])
+
+            if datImSt.setdefault(i[1], 0.0) == 0.0:         # Заполнение словаря Стоимости импорта
+                pass
+            datImSt[i[1]] += float(i[5])
+
+            if datImKol.setdefault(i[1], 0.0) == 0.0:        # Заполнение словаря Количества импорта
+                pass
+            datImKol[i[1]] += float(i[7])
+
+            if regImNETTO.setdefault(i[-1], 0.0) == 0.0:     # Заполнение словаря НЕТТО импорта по регионам
+                pass
+            regImNETTO[i[-1]] += float(i[6])
+
+            if regImSt.setdefault(i[-1], 0.0) == 0.0:        # Заполнение словаря Стоимости импорта по регионам
+                pass
+            regImSt[i[-1]] += float(i[5])
+
+            if regImKol.setdefault(i[-1], 0.0) == 0.0:       # Заполнение словаря Количества импорта по регионам
+                pass
+            regImKol[i[-1]] += float(i[7])
+        else:
+
+            if datExNETTO.setdefault(i[1], 0.0) == 0.0:      # Заполнение словаря НЕТТО экспорта
+                pass
+            datExNETTO[i[1]] += float(i[6])
+
+            if datExSt.setdefault(i[1], 0.0) == 0.0:         # Заполнение словаря Стоимости экспорта
+                pass
+            datExSt[i[1]] += float(i[5])
+
+            if datExKol.setdefault(i[1], 0.0) == 0.0:        # Заполнение словаря Количества экспорта
+                pass
+            datExKol[i[1]] += float(i[7])
+
+            if regExNETTO.setdefault(i[-1], 0.0) == 0.0:     # Заполнение словаря НЕТТО экспорта по регионам
+                pass
+            regExNETTO[i[-1]] += float(i[6])
+
+            if regExSt.setdefault(i[-1], 0.0) == 0.0:        # Заполнение словаря Стоимости экспорта по регионам
+                pass
+            regImSt[i[-1]] += float(i[5])
+
+            if regExKol.setdefault(i[-1], 0.0) == 0.0:       # Заполнение словаря Количества экспорта по регионам
+                pass
+            regImKol[i[-1]] += float(i[7])
+
+
+def Import():
+    bar_width = 0.2
+    cnt = 2
+    plt.suptitle('Составляющие импорта')
+    for x in datImNETTO.keys():
+        plt.subplot(3, 1, 1)
+        plt.xticks([2013, 2014, 2015, 2016])
+        plt.bar(int(x), datImNETTO.setdefault(x, 0.0), bar_width, color="BurlyWood", label='НЕТТО')
+        if cnt == 2:
+            plt.legend()
+            cnt -= 1
+
+        plt.subplot(3, 1, 2)
+        plt.xticks([2013, 2014, 2015, 2016])
+        plt.bar(int(x), datImSt.setdefault(x, 0.0), bar_width, color="LightSalmon", label='Стоимость')
+        if cnt == 1:
+            plt.legend()
+            cnt -= 1
+
+        plt.subplot(3, 1, 3)
+        plt.xticks([2013, 2014, 2015, 2016])
+        plt.bar(int(x), datImKol.setdefault(x, 0.0), bar_width, color="NavajoWhite", label='Количество')
+        if cnt == 0:
+            plt.legend()
+            cnt -= 1
+    plt.savefig('Import.png')
+    plt.show()
+
+
+def Export():
+    bar_width = 0.2
+    cnt = 2
+    plt.suptitle('Составляющие экспорта')
+    for x in datExNETTO.keys():
+        plt.subplot(3, 1, 1)
+        plt.xticks([2013, 2014, 2015, 2016])
+        plt.bar(int(x), datExNETTO.setdefault(x, 0.0), bar_width, color="BurlyWood", label='НЕТТО')
+        if cnt == 2:
+            plt.legend()
+            cnt -= 1
+
+        plt.subplot(3, 1, 2)
+        plt.xticks([2013, 2014, 2015, 2016])
+        plt.bar(int(x), datExSt.setdefault(x, 0.0), bar_width, color="LightSalmon", label='Стоимость')
+        if cnt == 1:
+            plt.legend()
+            cnt -= 1
+
+        if max(list(datExKol.values()))!= min(list(datExKol.values())):
+            plt.subplot(3, 1, 3)
+            plt.xticks([2013, 2014, 2015, 2016])
+            plt.bar(int(x), datExKol.setdefault(x, 0.0), bar_width, color="NavajoWhite", label='Количество')
+            if cnt == 0:
+                plt.legend()
+                cnt -= 1
+        elif (max(list(datExKol.values())) == 0) and (min(list(datExKol.values())) == 0):
+            continue
+
+        plt.savefig('Export.png')
+        plt.show()
+
+
+def RegImport():
+    # График НЕТТО
+    fig, ax = plt.subplots()
+    plt.suptitle('НЕТТО по регионам (импорт)')
+    bar_width = 0.3
+    index = np.arange(len(regImNETTO.keys()))
+    y = list(regImNETTO.values())
+    bars = []
+
+    for i in range(len(regImNETTO.keys())):
+        bars.append(ax.bar(index[i] + bar_width / 2, y[i], bar_width, color="C{}".format(i)))
+
+    ax.set_xticks(index + bar_width / 2)
+    ax.set_xticklabels(regImNETTO.keys(), rotation=90)
+    ax.tick_params(axis='x', which='both', top=False, bottom=False, labelbottom=False)
+    ax.spines['top'].set_alpha(0)
+    ax.spines['right'].set_alpha(0)
+    ax.spines['bottom'].set_alpha(0)
+    ax.yaxis.grid(alpha=0.5, linestyle="--")
+    plt.legend(bars, regImNETTO.keys())
+    plt.savefig('regImNETTO.png')
+
+    # График стоимости
+    fig, ax = plt.subplots()
+    plt.suptitle('Стоимость по регионам (импорт)')
+    bar_width = 0.3
+    index = np.arange(len(regImSt.keys()))
+    y = list(regImSt.values())
+    bars = []
+
+    for i in range(len(regImSt.keys())):
+        bars.append(ax.bar(index[i] + bar_width / 2, y[i], bar_width, color="C{}".format(i)))
+
+    ax.set_xticks(index + bar_width / 2)
+    ax.set_xticklabels(regImSt.keys(), rotation=90)
+    ax.tick_params(axis='x', which='both', top=False, bottom=False, labelbottom=False)
+    ax.spines['top'].set_alpha(0)
+    ax.spines['right'].set_alpha(0)
+    ax.spines['bottom'].set_alpha(0)
+    ax.yaxis.grid(alpha=0.5, linestyle="--")
+    plt.legend(bars, regImSt.keys())
+    plt.savefig('regImSt.png')
+
+    # График количества
+    fig, ax = plt.subplots()
+    plt.suptitle('Количество по регионам (импорт)')
+    bar_width = 0.3
+    index = np.arange(len(regImKol.keys()))
+    y = list(regImKol.values())
+    bars = []
+
+    for i in range(len(regImKol.keys())):
+        bars.append(ax.bar(index[i] + bar_width / 2, y[i], bar_width, color="C{}".format(i)))
+
+    ax.set_xticks(index + bar_width / 2)
+    ax.set_xticklabels(regImKol.keys(), rotation=90)
+    ax.tick_params(axis='x', which='both', top=False, bottom=False, labelbottom=False)
+    ax.spines['top'].set_alpha(0)
+    ax.spines['right'].set_alpha(0)
+    ax.spines['bottom'].set_alpha(0)
+    ax.yaxis.grid(alpha=0.5, linestyle="--")
+    plt.legend(bars, regImSt.keys())
+
+    plt.savefig('regImKol.png')
+    plt.show()
+
+
+def RegExport():
+    # График НЕТТО
+    fig, ax = plt.subplots()
+    plt.suptitle('НЕТТО по регионам (Экспорт)')
+    bar_width = 0.3
+    index = np.arange(len(regExNETTO.keys()))
+    y = list(regExNETTO.values())
+    bars = []
+
+    for i in range(len(regExNETTO.keys())):
+        bars.append(ax.bar(index[i] + bar_width / 2, y[i], bar_width, color="C{}".format(i)))
+
+    ax.set_xticks(index + bar_width / 2)
+    ax.set_xticklabels(regExNETTO.keys(), rotation=90)
+    ax.tick_params(axis='x', which='both', top=False, bottom=False, labelbottom=False)
+    ax.spines['top'].set_alpha(0)
+    ax.spines['right'].set_alpha(0)
+    ax.spines['bottom'].set_alpha(0)
+    ax.yaxis.grid(alpha=0.5, linestyle="--")
+    plt.legend(bars, regExNETTO.keys())
+
+    plt.savefig('regExNETTO.png')
+
+    # График стоимости
+    fig, ax = plt.subplots()
+    plt.suptitle('Стоимость по регионам (Экспорт)')
+    bar_width = 0.3
+    index = np.arange(len(regExSt.keys()))
+    y = list(regExSt.values())
+    bars = []
+
+    for i in range(len(regExSt.keys())):
+        bars.append(ax.bar(index[i] + bar_width / 2, y[i], bar_width, color="C{}".format(i)))
+
+    ax.set_xticks(index + bar_width / 2)
+    ax.set_xticklabels(regExSt.keys(), rotation=90)
+    ax.tick_params(axis='x', which='both', top=False, bottom=False, labelbottom=False)
+    ax.spines['top'].set_alpha(0)
+    ax.spines['right'].set_alpha(0)
+    ax.spines['bottom'].set_alpha(0)
+    ax.yaxis.grid(alpha=0.5, linestyle="--")
+    plt.legend(bars, regExSt.keys())
+    plt.savefig('regExSt.png')
+
+    # График количества
+    fig, ax = plt.subplots()
+    plt.suptitle('Количество по регионам (Экспорт)')
+    bar_width = 0.3
+    index = np.arange(len(regExKol.keys()))
+    y = list(regExKol.values())
+    bars = []
+
+    for i in range(len(regExKol.keys())):
+        bars.append(ax.bar(index[i] + bar_width / 2, y[i], bar_width, color="C{}".format(i)))
+
+    ax.set_xticks(index + bar_width / 2)
+    ax.set_xticklabels(regExKol.keys(), rotation=90)
+    ax.tick_params(axis='x', which='both', top=False, bottom=False, labelbottom=False)
+    ax.spines['top'].set_alpha(0)
+    ax.spines['right'].set_alpha(0)
+    ax.spines['bottom'].set_alpha(0)
+    ax.yaxis.grid(alpha=0.5, linestyle="--")
+    plt.legend(bars, regExKol.keys())
+
+    plt.savefig('regExKol.png')
+    plt.show()
+
+
+
+datImNETTO = {}
+datExNETTO = {}
+datImSt = {}
+datExSt = {}
+datImKol = {}
+datExKol = {}
+
+regImNETTO = {}
+regExNETTO = {}
+regImSt = {}
+regExSt = {}
+regImKol = {}
+regExKol = {}
+
+dating()
+
+Import()
+RegImport()
+Export()
+RegExport()
